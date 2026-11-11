@@ -1,19 +1,66 @@
-import React, { useState } from 'react';
+import React, {useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from'axios'
 export default function AuthForms() {
   const [activeTab, setActiveTab] = useState('register'); // 'register' | 'login' | 'reset'
 
   // Login Form States
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
+  const[logSuc,setLogSuc] =useState('')
+  const[logBad,setLogBad] = useState('')
+
+  const [fromData1, setFromData1] = useState({
+    email: '',
+    password: '',
+  });
+
+// Input change handler
+const handelChangeL = (e) => {
+  const { name, value } = e.target;
+
+  setFromData1({
+    ...fromData1,
+    [name]: value
+  });
+};
+
+// Form submit handler
+const handelSubmitL = async (e) => {
+  e.preventDefault();
+
+  setLogSuc('');
+  setLogBad('');
+
+  try {
+    const data = await axios.post(
+      'http://localhost:5000/login',
+      fromData1
+    );
+
+    if (data.data.success) {
+      setLogSuc(data.data.message);
+
+      setFromData1({
+        email: '',
+        password: ''
+      });
+    } else {
+      setLogBad(data.data.message);
+    }
+
+  } catch (error) {
+    setLogBad(
+      error.response.data.message 
+    );
+  }
+};
   // Registration Form States
 
-  const[suc,setSuc] =useState('')
-  const[bad,setBad] = useState('')
- 
+
+  const[regSuc,setRegSuc] =useState('')
+  const[regBad,setRegBad] = useState('')
+
   const[fromData,setFromData]=useState({
     fullName:'',
     email:'',
@@ -31,13 +78,12 @@ export default function AuthForms() {
 
 const handelSubmit = async (e) => {
   e.preventDefault();
-
   try {
     const data = await axios.post('http://localhost:5000/registration', fromData);
 
     if (data.data.success) {
-      setSuc(data.data.message);
-      setBad("");
+      setRegSuc(data.data.message);
+      setRegBad("");
       setFromData({
         fullName: "",
         email: "",
@@ -47,10 +93,12 @@ const handelSubmit = async (e) => {
     }
 
   } catch (error) {
-    setBad(error.response.data.message);
-    setSuc('');
+    setRegBad(error.response.data.message);
+    setRegSuc('');
   }
 };
+
+
 
   
 
@@ -92,16 +140,16 @@ const handelSubmit = async (e) => {
 
         {/* 1. REGISTRATION FORM */}
         {activeTab === "register" && (
-          <div>
-            {suc && (
+          <div className='message'>
+            {regSuc && (
               <div className="mb-4 text-center bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm font-medium">
-                {suc}
+                {regSuc}
               </div>
             )}
 
-            {bad && (
+            {regBad && (
               <div className="mb-4 text-center bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm font-medium">
-                {bad}
+                {regBad}
               </div>
             )}
 
@@ -201,62 +249,83 @@ const handelSubmit = async (e) => {
 
         {/* 2. LOGIN FORM */}
         {activeTab === "login" && (
-          <form className="space-y-4">
-            <h2 className="text-xl font-bold text-center text-white mb-4">
-              Welcome Back
-            </h2>
+          <div className="message">
+              {logSuc && (
+              <div className="mb-4 text-center bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg text-sm font-medium">
+                {logSuc}
+              </div>
+            )}
 
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
-              />
-            </div>
+            {logBad && (
+              <div className="mb-4 text-center bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm font-medium">
+                {logBad}
+              </div>
+            )}
 
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-xs font-medium text-slate-400">
-                  Password
+            <form onSubmit={handelSubmitL}  className="space-y-4">
+              <h2 className="text-xl font-bold text-center text-white mb-4">
+                Welcome Back
+              </h2>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1">
+                  Email Address
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("reset")}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <div className="relative">
                 <input
-                  type={showLoginPassword ? "text" : "password"}
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-900/80 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowLoginPassword(!showLoginPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
+                  type="email"
 
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-md mt-2"
-            >
-              Login
-            </button>
-          </form>
+                  value={fromData1.email}
+                  name="email"
+                  onChange={handelChangeL}
+
+                  placeholder="name@example.com"
+                  className="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-medium text-slate-400">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("reset")}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+
+                    value={fromData1.password}
+                    name="password"
+                    onChange={handelChangeL}
+
+                    placeholder="••••••••"
+                    className="w-full bg-slate-900/80 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                  >
+                    {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-md mt-2"
+              >
+                Login
+              </button>
+            </form>
+          </div>
         )}
 
         {/* 3. RESET PASSWORD FORM */}

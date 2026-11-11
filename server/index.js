@@ -63,13 +63,37 @@ app.post('/registration',async (req, res) => {
       return res.status(201).json({
       success:true,
       message: "Registration Done "
-    })
+    }) 
 
 })
 
+// login er jonno
+app.post('/login',async (req,res)=>{
 
+      const user = await User.findOne({
+        email: req.body.email,
+      });
 
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        })
+      }
 
+      if (req.body.password === user.password) {
+        res.status(200).json({
+          success: true,
+          message: 'Login successful'
+        });
+      }
+      else {
+        res.status(401).json({
+      success: false,
+      message: 'Wrong password'
+    });;
+      }   
+})
 
 
 app.listen(port, () => {
