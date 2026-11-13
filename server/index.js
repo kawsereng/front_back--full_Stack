@@ -1,23 +1,24 @@
 require("dotenv").config();
 const express = require('express');
-const mongoose = require('mongoose');
+
 const cors = require('cors')
 const User =require('./model/modelData')
 const app = express()
 
+const sendEmail = require("./controllers/emailSender");
+const loginSend = require("./controllers/loginEmail");
+const mongodbConnection = require("./config/mongodbConnect");
 
 app.use(express.json())
 app.use(cors())
 
 
-mongoose.connect(process.env.MONGODB_URL)
-.then(()=>{
+mongodbConnection()
 
-  console.log("database conected😎");
-  
-})
+
 
 let port = process.env.PORT ||5000
+
 let pattern=/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 
 app.post('/registration',async (req, res) => {
@@ -59,12 +60,14 @@ app.post('/registration',async (req, res) => {
           password :password,
           confirmPassword: confirmPassword
     })
-    newUser.save()
+      newUser.save()
+      await sendEmail(email)
       return res.status(201).json({
       success:true,
-      message: "Registration Done "
+      message: "Registration Done & Email Checked"
     }) 
 
+    
 })
 
 // login er jonno
@@ -82,9 +85,12 @@ app.post('/login',async (req,res)=>{
       }
 
       if (req.body.password === user.password) {
+
+       await loginSend(user.email)
+
         res.status(200).json({
           success: true,
-          message: 'Login successful'
+          message: 'Login successful & Email Checked',
         });
       }
       else {
@@ -94,6 +100,9 @@ app.post('/login',async (req,res)=>{
     });;
       }   
 })
+
+
+
 
 
 app.listen(port, () => {

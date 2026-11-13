@@ -45,14 +45,27 @@ const handelSubmitL = async (e) => {
         email: '',
         password: ''
       });
+
+      setTimeout(() => {
+        setLogSuc('');
+      }, 3000);
+
     } else {
       setLogBad(data.data.message);
+
+      setTimeout(() => {
+        setLogBad('');
+      }, 3000);
     }
 
   } catch (error) {
     setLogBad(
-      error.response.data.message 
+      error.response?.data?.message || 'Something went wrong!'
     );
+
+    setTimeout(() => {
+      setLogBad('');
+    }, 2000);
   }
 };
   // Registration Form States
@@ -78,23 +91,46 @@ const handelSubmitL = async (e) => {
 
 const handelSubmit = async (e) => {
   e.preventDefault();
+
+  setRegSuc('');
+  setRegBad('');
+
   try {
-    const data = await axios.post('http://localhost:5000/registration', fromData);
+    const data = await axios.post(
+      'http://localhost:5000/registration',
+      fromData
+    );
 
     if (data.data.success) {
       setRegSuc(data.data.message);
-      setRegBad("");
+
       setFromData({
-        fullName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+        fullName: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
       });
+
+      setTimeout(() => {
+        setRegSuc('');
+      }, 3000);
+
+    } else {
+      setRegBad(data.data.message);
+
+      setTimeout(() => {
+        setRegBad('');
+      }, 3000);
     }
 
   } catch (error) {
-    setRegBad(error.response.data.message);
-    setRegSuc('');
+    setRegBad(
+      error.response?.data?.message || 'Something went wrong!'
+    );
+
+    setTimeout(() => {
+      setRegBad('');
+    }, 2000);
   }
 };
 
